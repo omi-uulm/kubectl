@@ -5,8 +5,22 @@ build:
     entrypoint: [""]
   script:
     - mkdir -p /kaniko/.docker
-    - echo "building RELEASE $RELEASE"
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    # - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - |-
+      cat <<- EOF > /kaniko/.docker/config.json
+        {
+          "auths": {
+            "${CI_REGISTRY}": {
+              "username": "${CI_REGISTRY_USER}",
+              "password": "${CI_REGISTRY_PASSWORD}"
+            },
+            "https://index.docker.io/v1/": {
+              "auth": "${DOCKER_AUTH}"
+            }
+          }
+        } 
+      EOF 
+    - cat /kaniko/.docker/config.json
     - >
       /kaniko/executor 
       --build-arg=RELEASE_KUBECTL=$RELEASE_KUBECTL 
@@ -15,6 +29,7 @@ build:
       --context $CI_PROJECT_DIR 
       --dockerfile $CI_PROJECT_DIR/Dockerfile 
       --destination $CI_REGISTRY_IMAGE:${RELEASE_KUBECTL}_${RELEASE_KUSTOMIZE}_${RELEASE_HELM}
+      --destination inomi/kubectl-helm-kustomize:${RELEASE_KUBECTL}_${RELEASE_KUSTOMIZE}_${RELEASE_HELM}
   parallel:
     matrix:
       - RELEASE_KUBECTL:
@@ -25,3 +40,4 @@ build:
           - v4.4.0
         RELEASE_HELM:
           - v3.7.1
+
