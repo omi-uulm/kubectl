@@ -9,3 +9,5 @@ Repository upstream URL and builds: https://omi-gitlab.e-technik.uni-ulm.de/sv/k
 ## Dockerhub
 
 Dockerhub: https://hub.docker.com/r/inomi/kubectl-helm-kustomize
+
+The container tag is structured as follows: `kubectl-version` \_ `kustomize-version` \_ `helm-version`
